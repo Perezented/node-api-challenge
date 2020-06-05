@@ -10,6 +10,14 @@ function validateProject(req, res, next) {
     } else next();
 }
 
+function validateItsThere(req, res, next) {
+    Projects.get(req.params.id).then((value) => {
+        if (!value) {
+            res.status(404).json({ error: "Project is not found" });
+        } else next();
+    });
+}
+
 router.get("/", (req, res) => {
     Projects.get().then((projects) => {
         res.status(200).json(projects);
@@ -17,7 +25,7 @@ router.get("/", (req, res) => {
 });
 router.get("/:id", (req, res) => {
     Projects.get().then((value) => {
-        value.map((value) => {
+        value.filter((value) => {
             console.log(value.id);
             if (value.id == req.params.id) {
                 res.status(200).json(value);
@@ -37,13 +45,13 @@ router.post("/", validateProject, (req, res) => {
     Projects.insert(req.body).then(res.status(203).json(req.body));
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", validateItsThere, (req, res) => {
     Projects.remove(req.params.id).then((number) => {
         res.status(204).json(number);
     });
 });
 
-router.put("/:id", validateProject, (req, res) => {
+router.put("/:id", validateItsThere, validateProject, (req, res) => {
     req.body.id = req.params.id;
 
     // Projects.get().then(projects)

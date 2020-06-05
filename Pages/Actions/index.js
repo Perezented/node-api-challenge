@@ -11,8 +11,20 @@ router.get("/", (req, res) => {
     });
 });
 
-function validateItsThere(req, res, next) {}
-
+function validateItsThere(req, res, next) {
+    Actions.get(req.params.id).then((value) => {
+        if (!value) {
+            res.status(404).json({ error: "Action is not found" });
+        } else next();
+    });
+}
+function validateProjectId(req, res, next) {
+    Projects.get(req.body.project_id).then((value) => {
+        if (!value) {
+            res.status(404).json({ error: "Project not found" });
+        } else next();
+    });
+}
 function validateAction(req, res, next) {
     if (!req.body.description || !req.body.notes || !req.body.project_id) {
         res.status(400).json({
@@ -23,18 +35,18 @@ function validateAction(req, res, next) {
     } else next();
 }
 
-router.post("/", validateAction, (req, res) => {
+router.post("/", validateAction, validateProjectId, (req, res) => {
     Actions.insert(req.body).then(res.status(203).json(req.body));
 });
 
-router.put("/:id", validateAction, (req, res) => {
+router.put("/:id", validateAction, validateItsThere, (req, res) => {
     req.body.id = req.params.id;
     Actions.update(req.params.id, req.body).then(
         res.status(203).json(req.body)
     );
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", validateItsThere, (req, res) => {
     Actions.remove(req.params.id).then((number) => {
         res.status(204).json(number);
     });
