@@ -15,10 +15,21 @@ router.get("/", (req, res) => {
         res.status(200).json(projects);
     });
 });
-
+router.get("/:id", (req, res) => {
+    Projects.get().then((value) => {
+        value.map((value) => {
+            console.log(value.id);
+            if (value.id == req.params.id) {
+                res.status(200).json(value);
+            }
+        });
+    });
+});
 router.get("/:id/actions", (req, res) => {
     Projects.getProjectActions(req.params.id).then((project) => {
-        res.status(200).json(project);
+        if (project.length === 0) {
+            res.status(404).json({ error: "Specified project does not exist" });
+        } else res.status(200).json(project);
     });
 });
 
@@ -34,6 +45,8 @@ router.delete("/:id", (req, res) => {
 
 router.put("/:id", validateProject, (req, res) => {
     req.body.id = req.params.id;
+
+    // Projects.get().then(projects)
     Projects.update(req.params.id, req.body).then(
         res.status(203).json(req.body)
     );
