@@ -26,4 +26,10 @@ router.post("/", validateProject, (req, res) => {
     Projects.insert(req.body).then(res.status(203).json(req.body));
 });
 
+router.delete("/:id", (req, res) => {
+    Projects.remove(req.params.id).then((number) => {
+        res.status(204).json(number);
+    });
+});
+
 module.exports = router;
